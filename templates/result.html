@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <link href="/static/favicon.ico" rel="icon" type="image/x-icon">
+        <link href="/static/result.css" rel="stylesheet" />
+        <title>Black's dictionary</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <div class="grid-container">
+            <a class="signinbtn" href="/login" role="button">Login</a>
+            <a class="separator">|</a>
+            <a class="signupbtn" href="/register" role="button">Register</a>
+            <form action="/query" method="get">
+                <input type="search" name="word" id="Search" autocomplete="off" placeholder="Search another word..." onkeyup="suggestion()" required/>
+                <input type="submit" name="search" value="Search" required/>
+            </form>
+            <h1 class="keyword">{{ keyword }}</h1>
+            <p class="error">{{ error }}</p>
+            <div class="meaning">{{ meaning }}</div>
+        </div>
+        <script>
+            $(document).ready(function(){
+                var currentSelection = -1;
+                var maxSelection = 0;
+
+                $("#Search").on("input", function() {
+                    var query = $(this).val();
+                    if (query.length > 0) {
+                        $.ajax({
+                            url: '/suggestion?text=' + encodeURIComponent(query),
+                            method: 'GET',
+                            success: function(data) {
+                                $('.suggestions').remove();
+                                var suggestionList = $('<div>').addClass('suggestions');
+                                if (data.length === 0) {
+                                    var noResultItem = $('<a>').text('No result');
+                                    noResultItem.appendTo(suggestionList);
+                                } else {
+                                    $.each(data, function(i, word) {
+                                        var liItem = $('<a>').text(word);
+                                        liItem.appendTo(suggestionList);
+                                        liItem.on('click', function() {
+                                            $('#Search').val($(this).text());
+                                            $('.suggestions').remove();
+                                        });
+                                    });
+                                }
+                                $('#Search').after(suggestionList);
+                                maxSelection = $('.suggestions a').length;
+                                currentSelection = -1;
+                            }
+                        });
+                    }
+                    else {
+                        $('.suggestions').remove();
+                        maxSelection = 0;
+                        currentSelection = -1;
+                    }
+                });
+
+                $("#Search").on("keydown", function(e) {
+                    switch(e.which) {
+                        case 38: // arrow up
+                            if(currentSelection > 0) {
+                                currentSelection--;
+                            }
+                            break;
+                        case 40: // arrow down
+                            if(currentSelection < maxSelection - 1) {
+                                currentSelection++;
+                            }
+                            break;
+                        case 13: // enter
+                            if(currentSelection > -1) {
+                                var currentElement = $('.suggestions a').eq(currentSelection);
+                                $('#Search').val(currentElement.text());
+                                $('.suggestions').remove();
+                            }
+                            break;
+                    }
+
+                    $('.suggestions a').removeClass('selected');
+                    var currentElement = $('.suggestions a').eq(currentSelection);
+                    currentElement.addClass('selected');
+
+                    // Scroll to the selected element
+                    var scrollContainer = $('.suggestions');
+                    var currentElementTop = currentElement.position().top;
+                    var currentElementBottom = currentElementTop + currentElement.outerHeight();
+
+                    // Scroll up if the current element is above the visible area
+                    if (currentElementTop < 0) {
+                        scrollContainer.scrollTop(scrollContainer.scrollTop() + currentElementTop);
+                    } 
+                    // Scroll down if the current element is below the visible area
+                    else if (currentElementBottom > scrollContainer.height()) {
+                        scrollContainer.scrollTop(scrollContainer.scrollTop() + currentElementBottom - scrollContainer.height());
+                    }
+                });
+            });
+        </script>
+    </body>
+    <footer> &copy; black_phantom@NoSpaceAvailable 2024</footer>
+</html>

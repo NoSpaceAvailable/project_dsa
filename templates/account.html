@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="UTF-8">
+    <title>Login / Registration</title>
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/all.css'>
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/fontawesome.css'>
+    <link rel="stylesheet" href="/static/account.css">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+</head>
+<body>
+
+    <noscript>
+        <meta http-equiv="refresh" content="0; URL=static/error.html">
+    </noscript>
+
+    <a class="searchbtn" href="/" role="button">Search engine</a>
+    <h2>Login or register an account to use our hidden feature!</h2>
+    <div class="container" id="container">
+        <div class="form-container sign-up-container">
+            <form id="sign-up" action="register" method="post">
+                <h1>Create Account</h1>
+                <div class="social-container">
+                    <a href="#" class="social" id="facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social" id="google"><i class="fab fa-google"></i></a>
+                    <a href="#" class="social" id="github"><i class="fab fa-github"></i></a>
+                </div>
+                <span>or use your email for registration</span>
+                <input id="signup-username" type="text" placeholder="Username" name="username" onkeyup="checkusr()" required/>
+                <input id="signup-password" type="password" placeholder="Password" name="password" onkeyup="checkpw()" required/>
+                <input id="signup-confirm" type="password" placeholder="Confirm password" onkeyup="checkpw()" required/>
+                <span id="message"></span>
+                <button id="signUpButton"> Sign Up </button>
+            </form>
+        </div>
+        <div class="form-container sign-in-container">
+            <form id="sign-in" action="login" method="post">
+                <h1>Sign in</h1>
+                <div class="social-container">
+                    <a href="#" class="social" id="facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social" id="google"><i class="fab fa-google"></i></a>
+                    <a href="#" class="social" id="github"><i class="fab fa-github"></i></a>
+                </div>
+                <span>or use your account</span>
+                <input id="signin-username" type="username" placeholder="Username" name="username" required/>
+                <input id="signin-password" type="password" placeholder="Password" name="password" required/>
+                <a href="#">Forgot your password?</a>
+                <button id="signInButton"> Login </button>
+            </form>
+        </div>
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-left">
+                    <h1>Welcome Back!</h1>
+                    <p>To keep connected with us please login</p>
+                    <button class="ghost" id="signIn">Login</button>
+                </div>
+                <div class="overlay-panel overlay-right">
+                    <h1>Hello, World!</h1>
+                    <p>Register to use our great feature</p>
+                    <button class="ghost" id="signUp">Sign Up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p>{{msg}}</p>
+
+    <script>
+        const signUpButton = document.getElementById('signUp');
+        const signInButton = document.getElementById('signIn');
+        const container = document.getElementById('container');
+
+        signUpButton.addEventListener('click', () => {
+            container.classList.add("right-panel-active");
+        });
+
+        signInButton.addEventListener('click', () => {
+            container.classList.remove("right-panel-active");
+        });
+
+        var validUsr = false;
+
+        var checkusr = function() {
+
+            const regex = /[a-zA-Z0-9_]{6,30}/;
+            var username = document.getElementById("signup-username").value;
+            var btn = document.getElementById('signUpButton');
+            btn.disabled = true;
+
+            if (!regex.test(username) && validUsr === false) {
+                document.getElementById('message').style.color = 'red';
+                document.getElementById('message').innerHTML = 'Username must be 6 - 30 characters length, contain only lowercase, uppercase and underscore';
+            }
+            
+            else {
+                document.getElementById('message').innerHTML = '';
+                validUsr = true;
+            }
+        }
+
+        var checkpw = function() {
+            if (validUsr) {
+                matchedrgx = false;
+                const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}/;
+                var pw = document.getElementById("signup-password").value;
+                var pwcf = document.getElementById("signup-confirm").value;
+                btn = document.getElementById('signUpButton');
+                btn.disabled = true;
+
+                if (!regex.test(pw)) {
+                    document.getElementById('message').style.color = 'red';
+                    document.getElementById('message').innerHTML = 'Password length must be 8 - 100 characters length, must contain lowercase, uppercase and number';
+                }
+                else {
+                    matchedrgx = true;
+                    document.getElementById('message').innerHTML = '';
+                    if (pw != pwcf) {
+                        document.getElementById('message').style.color = 'red';
+                        document.getElementById('message').innerHTML = 'Password does not match!';
+                    }
+                    else {
+                        document.getElementById('message').style.color = 'green';
+                        document.getElementById('message').innerHTML = 'Password matched!';
+                        btn.disabled = false;
+                    }
+                }
+            }
+        }
+    </script>
+    <footer> &copy; black_phantom@NoSpaceAvailable 2024</footer>
+  
+</body>
+</html>

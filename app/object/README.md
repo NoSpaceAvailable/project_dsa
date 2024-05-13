@@ -1,0 +1,1 @@
+# This repository include *trie* data structure (we use it as a dictionary), data file and some engine that I made for this project

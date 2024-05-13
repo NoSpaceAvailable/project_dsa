@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet" />
+    <link href="/static/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="/static/index.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title>Black's dictionary</title>
+  </head>
+  <body>
+    <div class="s130">
+      <a class="signinbtn" href="/login" role="button">Login</a>
+      <a class="separator">|</a>
+      <a class="signupbtn" href="/register" role="button">Register</a>
+      <form>
+        <div class="inner-form">
+          <div class="input-field first-wrap">
+            <div class="svg-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+              </svg>
+            </div>
+            <input id="search" type="text" placeholder="Search for English words here!" onkeyup="suggestion()"/>
+          </div>
+          <div class="input-field second-wrap">
+            <button class="btn-search" type="button">SEARCH NOW</button>
+          </div>
+        </div>
+        <span class="info">English vocabulary for us!!!</span>
+      </form>
+    </div>
+    <script>
+      document.querySelector(".btn-search").addEventListener('click', function(){
+        var word = document.getElementById('search').value;
+            window.location.href = "/query?word=" + encodeURIComponent(word);
+        });
+
+        document.getElementById('search').addEventListener('keypress', function(event){
+          if (event.key === 'Enter'){
+            event.preventDefault()
+            var word = document.getElementById('search').value;
+            window.location.href = "/query?word=" + encodeURIComponent(word);
+          }
+        });
+
+        document.onreadystatechange = function () {
+          var state = document.readyState;
+          if (state == 'interactive') {
+              document.getElementById('loading').style.display = 'block';
+          } else if (state == 'complete') {
+              setTimeout(function(){
+                  document.getElementById('loading').style.display = 'none';
+              }, 1000);
+          }
+      }
+
+      $(document).ready(function(){
+                var currentSelection = -1;
+                var maxSelection = 0;
+
+                $("#search").on("input", function() {
+                    var query = $(this).val();
+                    if (query.length > 0) {
+                        $.ajax({
+                            url: '/suggestion?text=' + encodeURIComponent(query),
+                            method: 'GET',
+                            success: function(data) {
+                                $('.suggestions').remove();
+                                var suggestionList = $('<div>').addClass('suggestions');
+                                if (data.length === 0) {
+                                    var noResultItem = $('<a>').text('No result');
+                                    noResultItem.appendTo(suggestionList);
+                                } else {
+                                    $.each(data, function(i, word) {
+                                        var liItem = $('<a>').text(word);
+                                        liItem.appendTo(suggestionList);
+                                        liItem.on('click', function() {
+                                            $('#search').val($(this).text());
+                                            $('.suggestions').remove();
+                                        });
+                                    });
+                                }
+                                $('#search').after(suggestionList);
+                                maxSelection = $('.suggestions a').length;
+                                currentSelection = -1;
+                            }
+                        });
+                    }
+                    else {
+                        $('.suggestions').remove();
+                        maxSelection = 0;
+                        currentSelection = -1;
+                    }
+                });
+
+                $("#search").on("keydown", function(e) {
+                    switch(e.which) {
+                        case 38: // arrow up
+                            if(currentSelection > 0) {
+                                currentSelection--;
+                            }
+                            break;
+                        case 40: // arrow down
+                            if(currentSelection < maxSelection - 1) {
+                                currentSelection++;
+                            }
+                            break;
+                        case 13: // enter
+                            if(currentSelection > -1) {
+                                var currentElement = $('.suggestions a').eq(currentSelection);
+                                $('#search').val(currentElement.text());
+                                $('.suggestions').remove();
+                            }
+                            break;
+                    }
+
+                    $('.suggestions a').removeClass('selected');
+                    var currentElement = $('.suggestions a').eq(currentSelection);
+                    currentElement.addClass('selected');
+
+                    // Scroll to the selected element
+                    var scrollContainer = $('.suggestions');
+                    var currentElementTop = currentElement.position().top;
+                    var currentElementBottom = currentElementTop + currentElement.outerHeight();
+
+                    // Scroll up if the current element is above the visible area
+                    if (currentElementTop < 0) {
+                        scrollContainer.scrollTop(scrollContainer.scrollTop() + currentElementTop);
+                    } 
+                    // Scroll down if the current element is below the visible area
+                    else if (currentElementBottom > scrollContainer.height()) {
+                        scrollContainer.scrollTop(scrollContainer.scrollTop() + currentElementBottom - scrollContainer.height());
+                    }
+                });
+            });
+    </script>
+  </body>
+  <footer> &copy; black_phantom@NoSpaceAvailable 2024</footer>
+</html>
