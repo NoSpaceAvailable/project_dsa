@@ -12,6 +12,3 @@ sleep 1
 echo "[o] Checking dependencies ..."
 sleep 2
 python3 dependencies.py
-
-# Run the app
-python3 main.py
