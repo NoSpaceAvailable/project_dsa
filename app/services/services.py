@@ -321,8 +321,11 @@ async def get_suggestion(request : Request, text : str):
     Return:
         * Return a list contains all the relevant keywords which will later be shown to user
     """
-    result = suggestion(suggest_list, text.strip().lower()[:20])
-    return result
+    text = text.strip().lower()[:20]
+    if text != '':
+        result = suggestion(suggest_list, text)
+        return result
+    return []
 
 
 @app.exception_handler(404)
