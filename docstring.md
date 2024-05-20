@@ -1,6 +1,6 @@
 # Project DSA: dictionary documentation
 ## Class docstring
-* There are some class which I implemented and used in this project
+* There are some classes which I implemented and used in this project
 ### Class definitions
 | Class | Description | Destination |
 | --- | --- | --- |
