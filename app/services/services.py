@@ -234,7 +234,7 @@ async def query(request : Request, word : str | None = None):
     if word:
         """If user enter a word, turn it to lowercase and search"""
         try:
-            _word = word.lower()
+            _word = word.lower().strip()
             result = data.translate(_word)
             if not result:
                 result = "No result!"
@@ -321,7 +321,7 @@ async def get_suggestion(request : Request, text : str):
     Return:
         * Return a list contains all the relevant keywords which will later be shown to user
     """
-    result = suggestion(suggest_list, text[:20].lower())
+    result = suggestion(suggest_list, text.strip().lower()[:20])
     return result
 
 
