@@ -4,7 +4,10 @@ from app.object.data import DataProcessor
 
 def ImportedDictionary() -> Dictionary:
     """Automatically import English word to dictionary. 
-    It reads data from 'english-vietnamese.txt', processes (re-format) the data and returns the formatted data"""
+    It reads data from 'english-vietnamese.txt', processes (re-format) the data and returns the formatted data
+    
+    Return:
+        * Return a data-filled dictionary"""
 
     processor = DataProcessor("./app/object/english-vietnamese.txt")    # Import data to data processor class
     processed_data = processor.process()                                # Processing the data to a prettier format

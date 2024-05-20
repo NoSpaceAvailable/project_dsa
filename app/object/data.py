@@ -2,12 +2,20 @@ class DataProcessor:
     """A class to process and prepare data for dictionary"""
 
     def __init__(self, data_path : str) -> None:
-        """Initialize a processor for reading data from a file. Only support .txt file!"""
+        """Initialize a processor for reading data from a file. Only support .txt file!
+        
+        Parameters:
+            * data_path(str): the OS path to the destination which the dataset located
+        """
         self.data = open(data_path, "r", encoding="utf-8").readlines()
 
 
     def process(self) -> list:
-        """Transform data from txt file to word - meaning pairs"""
+        """Transform data from txt file to word - meaning pairs
+        
+        Return:
+            * Return a list that contain well-formatted data
+        """
         self.prepared_data = []     # Initialize a list that contain only formatted data
         key = pronunciation = value = ''
 

@@ -35,7 +35,14 @@ db = SQLDatabase()              # Database to store user accounts
 
 
 def is_logged_in(token : str) -> bool:
-    """Check if user is logged in"""
+    """Check if user is logged in
+    
+    Parameters:
+        * token (str): JWT token that user is holding
+        
+    Return:
+        * Return True if the JWT login token is valid, else return False
+    """
     return decrypt(
         # If user is using a valid key, the keey will be decrypted and the function will return True
         jwt_token = token,
@@ -44,9 +51,14 @@ def is_logged_in(token : str) -> bool:
 
 
 def validator(username : str, password : str) -> bool:
-    """Check username and password rule. The rules are:
-    * Username must be longer than 6 characters 
-    * Password must have the length between 8 - 100 characters, must contain an uppercase, lowercase and number
+    """Check username and password rule.
+    
+    Parameters:
+        * username (str): must be longer than 6 characters 
+        * password (str): must have the length between 8 - 100 characters, must contain an uppercase, lowercase and number
+
+    Return:
+        * Return True if the conditions above are matched. Otherwise, return False
     """
     if re.match(usr_regex, username) != None and re.match(pw_regex, password) != None:
         return True
@@ -54,13 +66,27 @@ def validator(username : str, password : str) -> bool:
 
 
 def hasher(string : str) -> str:
-    """Hash the password before store to database"""
+    """Hash the password before store to database
+    
+    Parameters:
+        * string (str): string to be hashed
+        
+    Return:
+        * Hashed string
+    """
     return sha1(bytes(string, encoding='UTF-8')).hexdigest()    # TODO: bug insert null value
 
 
 @service.get("/login")
 def login(request : Request):
-    """Login service interface for users"""
+    """Login service interface for users
+    
+    Parameters:
+        * request: user's request
+        
+    Return:
+        * Return the login page to user
+    """
     msg = request.cookies.get("msg") if request.cookies.get("msg") else ""
     response = template.TemplateResponse(
         # Return html page
@@ -77,7 +103,14 @@ def login(request : Request):
 
 @service.post("/login")
 async def submit(request : Request):
-    """Submit login data to the server"""
+    """Submit login data to the server
+    
+    Parameters: 
+        * request: user's request
+        
+    Return:
+        * Return the user's home page if login succeeded. Otherwise, return login page with a message
+    """
     form_data = await request.form()    # Get username and password from user
     _username = form_data.get("username")
     _password = hasher(form_data.get("password"))
@@ -105,7 +138,14 @@ async def submit(request : Request):
 
 @service.get("/register")
 async def register(request : Request):
-    """Account registration user interface"""
+    """Account registration user interface
+    
+    Parameters:
+        * request: user's request
+        
+    Return:
+        * Return registration page
+    """
     return template.TemplateResponse(
         "account.html",
         context = {
@@ -116,7 +156,14 @@ async def register(request : Request):
 
 @service.post("/register")
 async def submit(request : Request):
-    """Submit registration data to the server"""
+    """Submit and save registration data to the server. 
+    
+    Parameters:
+        * request: user's request
+        
+    Return:
+        * Return the login/registration page with a message
+    """
     form_data = await request.form()
 
     username = form_data.get("username")
@@ -150,7 +197,14 @@ async def submit(request : Request):
 
 @service.get("/logout")
 async def logout(request : Request):
-    """Log user out by deleting the JWT token"""
+    """Log user out by deleting the JWT token
+    
+    Parameters:
+        * request: user's request
+        
+    Return:
+        * Return login page
+    """
     response = template.TemplateResponse(
         # Return html page
         "account.html",
@@ -166,7 +220,15 @@ async def logout(request : Request):
 @service.get("/query")
 async def query(request : Request, word : str | None = None):
     """Search for the entered word in the dictionary. 
-    If user didn't enter anything or the keyword is not exists, it will return an error message."""
+    If user didn't enter anything or the keyword is not exists, it will return an error message
+    
+    Parameters:
+        * request: user's request
+        * word (str): keyword to be searched
+        
+    Return:
+        * Return the keyword's meaning as a string. If the word has no meaning, return a message
+    """
     _word = ''
     result = ''
     if word:
@@ -200,7 +262,15 @@ async def query(request : Request, word : str | None = None):
 
 @service.get("/home")
 async def home_page(request : Request, response : Response):
-    """Endpoint for the user's secret home page. Users will see a famous music video here :)"""
+    """Endpoint for the user's secret home page. Users will see a famous music video here :)
+    
+    Parameters:
+        * request: user's request
+        * response: server's response
+        
+    Return:
+        * Return user's home page when the user is logged in. Otherwise, redirect user to the login page with a message
+    """
     token = request.cookies.get("session")
     if  is_logged_in(token):
         return template.TemplateResponse(
@@ -223,7 +293,14 @@ async def home_page(request : Request, response : Response):
 
 @service.get("/")
 def root(request : Request):
-    """Main page of the website"""
+    """Main page of the website
+    
+    Parameters:
+        * request: user's request
+    
+    Return:
+        * index.html page
+    """
     return template.TemplateResponse(
         # Return index.html
         "index.html", 
@@ -235,14 +312,30 @@ def root(request : Request):
 
 @service.get("/suggestion")
 async def get_suggestion(request : Request, text : str):
-    """Endpoint for word suggestion service. Relevant keywords will be sent to user as suggestions"""
+    """Endpoint for word suggestion service. Relevant keywords will be sent to user as suggestions
+    
+    Parameters:
+        * request: user's request
+        * text (str): user's input text
+        
+    Return:
+        * Return a list contains all the relevant keywords which will later be shown to user
+    """
     result = suggestion(suggest_list, text[:20].lower())
     return result
 
 
 @app.exception_handler(404)
 def error_404(request : Request, exception : UnicornException):
-    """Handle 404 error"""
+    """Handle 404 error
+    
+    Parameters:
+        * request: user's request
+        * exception: exception handler
+        
+    Return:
+        Return error 404 page if the requested resource is not exists
+    """
     return template.TemplateResponse(
         # Return standard 404 not found page
         "error.html",
