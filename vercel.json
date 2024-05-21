@@ -1,18 +1,19 @@
 {
     "version": 2,
-    "functions": {
-      "api/main.py": {
-        "runtime": "python3.9"
+    "builds": [
+      {
+        "src": "main.py",
+        "use": "@vercel/python"
       }
-    },
+    ],
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "/api/main.py"
+        "dest": "/main.py"
       }
     ],
     "env": {
-      "APP_MODULE": "app.services:app"
+      "APP_MODULE": "main:app"
     }
   }
   
