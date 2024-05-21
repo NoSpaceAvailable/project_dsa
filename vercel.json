@@ -13,6 +13,12 @@
       }
     ],
     "env": {
-      "APP_MODULE": "main:app"
+      "APP_MODULE": "app.services:app"
+    },
+    "functions": {
+      "api/main.py": {
+        "runtime": "python@3.9"
+      }
     }
-  }  
+  }
+  
