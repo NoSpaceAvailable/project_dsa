@@ -5,12 +5,121 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <link href="/static/favicon.ico" rel="icon" type="image/x-icon">
-        <link href="/static/result.css" rel="stylesheet" />
-        <title>User's home page :)</title>
+        <link href="/static/home.css" rel="stylesheet" />
+        <title>Home</title>
     </head>
     <body>
-        <a class="logoutbtn" href="/logout" role="button">Logout</a>
-            <iframe id = "secret" width="960" height="540" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1"></iframe>
+        <nav class="navbar">
+            <div class="container">
+          
+            <div class="navbar-header">
+                    <button class="navbar-toggler" data-toggle="open-navbar1">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <a href="/">
+                        <img src="/static/favicon.ico" style="width: 25px; height: 25px;">
+                        <h4>&#160;Black's Dictionary</h4>
+                    </a>
+                </div>
+          
+                <div class="navbar-menu" id="open-navbar1">
+                    <ul class="navbar-nav">
+                        <li class="active"><a href="/">Search</a></li>
+                        <li class="navbar-dropdown">
+                    <a href="#" class="dropdown-toggler" data-dropdown="my-dropdown-id">{{ username or 'User' }}<i class="fa fa-angle-down"></i></a>
+                    <ul class="dropdown" id="my-dropdown-id">
+                        <li><a href="/home?history=show#history" class="button">Search history</a></li>
+                        <li class="separator"></li>
+                        <li><a href="/home?history=clear">Clear search history</a></li>
+                        <li class="separator"></li>
+                        <li><a href="/logout">Logout</a></li>
+                    </ul>
+                    </li>
+               
+                    <li><a href="#about" class="button">About us</a></li>
+                    <li><a href="https://www.facebook.com/mynameislqc">Contact</a></li>
+                </ul>
+                </div>
+            </div>
+
+            <div id="history" class="overlay">
+                <div class="popup">
+                    <h2>Search history</h2>
+                    <a class="close" href="#">&times;</a>
+                    <div class="content" style="white-space: pre-line;">
+                        {{ history }}
+                    </div>
+                </div>
+            </div>
+
+            <div id="about" class="overlay">
+                <div class="popup">
+                    <h2>About Black's Dictionary</h2>
+                    <a class="close" href="#">&times;</a>
+                    <div class="content">
+                        I'm a first - year student of University of Information Technology, and this is my small project. I made a simple dictionary based on Prefix Tree (a.k.a Trie). 
+                    </div>
+                </div>
+            </div>
+        </nav>
+    
+        <script>
+            let dropdowns = document.querySelectorAll('.navbar .dropdown-toggler')
+            let dropdownIsOpen = false
+    
+            // Handle dropdown menues
+            if (dropdowns.length) {
+            dropdowns.forEach((dropdown) => {
+                dropdown.addEventListener('click', (event) => {
+                let target = document.querySelector(`#${event.target.dataset.dropdown}`)
+    
+                if (target) {
+                    if (target.classList.contains('show')) {
+                    target.classList.remove('show')
+                    dropdownIsOpen = false
+                    } else {
+                    target.classList.add('show')
+                    dropdownIsOpen = true
+                    }
+                }
+                })
+            })
+            }
+    
+            // Handle closing dropdowns if a user clicked the body
+            window.addEventListener('mouseup', (event) => {
+            if (dropdownIsOpen) {
+                dropdowns.forEach((dropdownButton) => {
+                let dropdown = document.querySelector(`#${dropdownButton.dataset.dropdown}`)
+                let targetIsDropdown = dropdown == event.target
+    
+                if (dropdownButton == event.target) {
+                    return
+                }
+    
+                if ((!targetIsDropdown) && (!dropdown.contains(event.target))) {
+                    dropdown.classList.remove('show')
+                }
+                })
+            }
+            })
+            function handleSmallScreens() {
+            document.querySelector('.navbar-toggler')
+                .addEventListener('click', () => {
+                let navbarMenu = document.querySelector('.navbar-menu')
+    
+                if (!navbarMenu.classList.contains('active')) {
+                    navbarMenu.classList.add('active')
+                } else {
+                    navbarMenu.classList.remove('active')
+                }
+                })
+            }
+    
+            handleSmallScreens()
+        </script>
     </body>
     <footer> &copy; black_phantom@NoSpaceAvailable 2024</footer>
 </html>

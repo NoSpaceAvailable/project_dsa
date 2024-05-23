@@ -7,6 +7,7 @@ from app.object.cookie import encrypt, decrypt
 from app.object.cookie import SECRET_KEY
 from app.object.suggest import suggestion
 from hashlib import sha1
+import os
 import re
 
 
@@ -87,6 +88,12 @@ def login(request : Request):
     Return:
         * Return the login page to user
     """
+    token = request.cookies.get("session")
+    if  is_logged_in(token):
+        return RedirectResponse(
+            url = "/home",
+            status_code = 303,
+        )
     msg = request.cookies.get("msg") if request.cookies.get("msg") else ""
     response = template.TemplateResponse(
         # Return html page
@@ -96,8 +103,9 @@ def login(request : Request):
             "msg" : msg
         }
     )
+    response.delete_cookie("session")   # Delete the logged-in token
+    response.delete_cookie("username")
     response.delete_cookie("msg")
-    response.delete_cookie("session")   # Delete if there is a cookie
     return response
 
 
@@ -117,14 +125,16 @@ async def submit(request : Request):
 
     if db.query(_username, _password) == 1:
         """Check if the username and password is correct"""
-        return RedirectResponse(
+        response = RedirectResponse(
             # If the username and password are correct, redirect user to homepage and set a logged-in token
             url = "/home",
             status_code = 303,
-            headers = {
-                "Set-Cookie" : f"session={encrypt(form_data.get('username'), SECRET_KEY)}"
-            }
         )
+        response.set_cookie("session", encrypt(form_data.get('username'), SECRET_KEY))
+        response.set_cookie("username", _username)
+        response.delete_cookie("msg")
+        return response
+
     else:
         # If username and password are not correct, send a message
         return template.TemplateResponse(
@@ -146,12 +156,22 @@ async def register(request : Request):
     Return:
         * Return registration page
     """
-    return template.TemplateResponse(
+    token = request.cookies.get("session")
+    if  is_logged_in(token):
+        return RedirectResponse(
+            url = "/home",
+            status_code = 303,
+        )
+    response = template.TemplateResponse(
         "account.html",
         context = {
             "request" : request
         }
     )
+    response.delete_cookie("session")   # Delete the logged-in token
+    response.delete_cookie("username")
+    response.delete_cookie("msg")
+    return response
 
 
 @service.post("/register")
@@ -214,6 +234,8 @@ async def logout(request : Request):
         }
     )
     response.delete_cookie("session")   # Delete the logged-in token
+    response.delete_cookie("username")
+    response.delete_cookie("msg")
     return response
 
 
@@ -236,6 +258,10 @@ async def query(request : Request, word : str | None = None):
         try:
             _word = word.lower().strip()
             result = data.translate(_word)
+            if request.cookies.get("session") and request.cookies.get("username") and result:
+                if is_logged_in(request.cookies.get("session")):
+                    with open(f"./app/users/{hasher(request.cookies.get('username'))}.history.txt", "a") as history:
+                        history.write(_word + "\n")
             if not result:
                 result = "No result!"
         except:
@@ -261,7 +287,7 @@ async def query(request : Request, word : str | None = None):
 
 
 @service.get("/home")
-async def home_page(request : Request, response : Response):
+async def home_page(request : Request, response : Response, history : str | None = None):
     """Endpoint for the user's secret home page. Users will see a famous music video here :)
     
     Parameters:
@@ -272,12 +298,42 @@ async def home_page(request : Request, response : Response):
         * Return user's home page when the user is logged in. Otherwise, redirect user to the login page with a message
     """
     token = request.cookies.get("session")
+    username = request.cookies.get("username")
     if  is_logged_in(token):
+        if history == "show":
+            try:
+                user_history = '\n'.join(open(f"./app/users/{hasher(request.cookies.get('username'))}.history.txt", "r").readlines()[-10:])
+                return template.TemplateResponse(
+                    # Return the standard home page
+                    "home.html",
+                    context = {
+                        "request" : request,
+                        "username" : username,
+                        "history" : user_history
+                    }
+                )
+            except:
+                return template.TemplateResponse(
+                    # Return the standard home page
+                    "home.html",
+                    context = {
+                        "request" : request,
+                        "username" : username,
+                        "history" : "Nothing to show!"
+                    }
+                )
+        elif history == "clear":
+            try:
+                os.remove(f"./app/users/{hasher(request.cookies.get('username'))}.history.txt")
+            except:
+                pass
+
         return template.TemplateResponse(
             # Return the standard home page
             "home.html",
             context = {
                 "request" : request,
+                "username" : username
             }
         )
     else:

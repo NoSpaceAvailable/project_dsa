@@ -12,3 +12,5 @@ sleep 1
 echo "[o] Checking dependencies ..."
 sleep 2
 python3 dependencies.py
+
+python3 main.py
